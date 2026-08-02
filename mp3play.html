@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聽解專用 MP3 播放器 (帶 AB 點複習)</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        .player-card {
+            background: #ffffff;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+
+        /* 檔案選擇器 */
+        .file-input-wrapper {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .file-btn {
+            background-color: #eef2f5;
+            color: #34495e;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+
+        .file-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* 標記 (A點) 功能專屬區塊 */
+        .bookmark-section {
+            background-color: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bookmark-info {
+            font-size: 14px;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .bookmark-time {
+            color: #e74c3c;
+            font-size: 16px;
+        }
+
+        .btn-mark {
+            background-color: #8e44ad;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-jump {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-mark:active, .btn-jump:active {
+            transform: scale(0.95);
+        }
+
+        /* 進度條區塊 */
+        .progress-container {
+            margin: 15px 0 10px;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        /* 特大進度條 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 14px;
+            background: #e2e8f0;
+            border-radius: 7px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e74c3c;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+
+        /* 控制按鈕區塊 */
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 25px;
+            gap: 8px;
+        }
+
+        .btn {
+            border: none;
+            background: #f0f3f6;
+            color: #2c3e50;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            flex: 1;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            background: #e2e8f0;
+        }
+
+        .btn-rewind {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .btn-play {
+            background-color: #e74c3c;
+            color: white;
+            font-size: 18px;
+            flex: 1.2;
+        }
+
+        /* 倍速 */
+        .speed-control {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .speed-btn {
+            border: 1px solid #cbd5e1;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .speed-btn.active {
+            background: #34495e;
+            color: white;
+            border-color: #34495e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-card">
+        <div class="title" id="songTitle">請選擇聽解錄音檔</div>
+
+        <!-- 選擇檔案按鈕 -->
+        <div class="file-input-wrapper">
+            <label for="audioFile" class="file-btn">📁 開啟 MP3 檔案</label>
+            <input type="file" id="audioFile" accept="audio/*">
+        </div>
+
+        <audio id="audioPlayer"></audio>
+
+        <!-- 🌟 新增：標記與一鍵返回區塊 -->
+        <div class="bookmark-section">
+            <div class="bookmark-info">
+                標記 A 點：<span class="bookmark-time" id="bookmarkDisplay">未設定</span>
+            </div>
+            <div>
+                <button class="btn-mark" onclick="setBookmark()">📍 標記</button>
+                <button class="btn-jump" onclick="jumpToBookmark()">↩ 重聽 A 點</button>
+            </div>
+        </div>
+
+        <!-- 時間與加大進度條 -->
+        <div class="progress-container">
+            <div class="time-display">
+                <span id="currentTime">00:00</span>
+                <span id="duration">00:00</span>
+            </div>
+            <input type="range" id="progressBar" value="0" min="0" max="100" step="0.1">
+        </div>
+
+        <!-- 控制按鈕 -->
+        <div class="controls">
+            <button class="btn btn-rewind" onclick="skip(-3)">⇠ 3秒</button>
+            <button class="btn btn-rewind" onclick="skip(-5)">⇠ 5秒</button>
+            <button class="btn btn-play" id="playBtn" onclick="togglePlay()">播放</button>
+            <button class="btn" onclick="skip(5)">5秒 ⇢</button>
+        </div>
+
+        <!-- 倍速控制 -->
+        <div class="speed-control">
+            <span>倍速：</span>
+            <button class="speed-btn" onclick="setSpeed(0.8, this)">0.8x</button>
+            <button class="speed-btn active" onclick="setSpeed(1.0, this)">1.0x</button>
+            <button class="speed-btn" onclick="setSpeed(1.2, this)">1.2x</button>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const songTitle = document.getElementById('songTitle');
+        const fileInput = document.getElementById('audioFile');
+        const bookmarkDisplay = document.getElementById('bookmarkDisplay');
+
+        // 儲存 A 點時間（預設為 0 秒）
+        let bookmarkTime = 0;
+        let isBookmarked = false;
+
+        // 1. 載入檔案
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const objectUrl = URL.createObjectURL(file);
+                audio.src = objectUrl;
+                songTitle.innerText = file.name;
+                audio.play();
+                playBtn.innerText = '暫停';
+                
+                // 換新歌時重置標記
+                bookmarkTime = 0;
+                isBookmarked = false;
+                bookmarkDisplay.innerText = "未設定";
+            }
+        });
+
+        // 2. 播放 / 暫停
+        function togglePlay() {
+            if (!audio.src) return;
+            if (audio.paused) {
+                audio.play();
+                playBtn.innerText = '暫停';
+            } else {
+                audio.pause();
+                playBtn.innerText = '播放';
+            }
+        }
+
+        // 3. 快退 / 快進
+        function skip(seconds) {
+            if (!audio.src) return;
+            audio.currentTime = Math.min(Math.max(audio.currentTime + seconds, 0), audio.duration);
+        }
+
+        // 4. 🌟 標記當前時間為 A 點
+        function setBookmark() {
+            if (!audio.src) return;
+            bookmarkTime = audio.currentTime;
+            isBookmarked = true;
+            bookmarkDisplay.innerText = formatTime(bookmarkTime);
+        }
+
+        // 5. 🌟 一鍵返回 A 點並繼續播放
+        function jumpToBookmark() {
+            if (!audio.src) return;
+            audio.currentTime = bookmarkTime;
+            if (audio.paused) {
+                audio.play();
+                playBtn.innerText = '暫停';
+            }
+        }
+
+        // 時間格式化
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "00:00";
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // 更新進度條
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const progressPercent = (audio.currentTime / audio.duration) * 100;
+                progressBar.value = progressPercent;
+                currentTimeEl.innerText = formatTime(audio.currentTime);
+            }
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.innerText = formatTime(audio.duration);
+        });
+
+        progressBar.addEventListener('input', () => {
+            if (audio.duration) {
+                const seekTime = (progressBar.value / 100) * audio.duration;
+                audio.currentTime = seekTime;
+            }
+        });
+
+        function setSpeed(speed, btn) {
+            audio.playbackRate = speed;
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // 鍵盤快捷鍵加強
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlay();
+            } else if (e.code === 'ArrowLeft') {
+                skip(-3);
+            } else if (e.code === 'ArrowRight') {
+                skip(5);
+            } else if (e.key.toLowerCase() === 'm') {
+                setBookmark(); // 電腦按 M 鍵：打點標記
+            } else if (e.key.toLowerCase() === 'b') {
+                jumpToBookmark(); // 電腦按 B 鍵：回到標記點
+            }
+        });
+    </script>
+</body>
+</html>
