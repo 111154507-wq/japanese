@@ -34,6 +34,10 @@
             color: #dadde0;
             margin-bottom: 10px;
         }
+        /* 重點變紅的 CSS 類別 */
+        .highlight {
+            color: #e74c3c; /* 紅色 */
+        }
         /* 第二行文字：現在用來顯示「原形 / 漢字」 */
         .dictionary-form {
             font-size: 72px;
@@ -748,6 +752,7 @@
             ["", "もっと", "更、再多一點"],
             ["", "いつも", "總是"],
             ["後で", "あとで", "等下、稍後"],
+            ["", "<span class='highlight'>あと</span>", "之後"],
             ["時々", "ときどき", "有時候"],
             ["", "とき", "……時"],
             ["", "たまに", "偶爾"],
@@ -952,6 +957,25 @@
             ["答え", "こたえ", "回答", "口答（ta）A"],
             ["説明する", "せつめいします", "說明，講解"],
             ["考える", "かんがえます", "思考，想"],
+            ["", "1,3,4,6,8,10,なん 後面濁化", "「三」、「何」+B音；<br>1,6,8,10 一律「っ+P」：<br>さんびゃく / なんびゃく<br>さんぷん / なんぷん<br>いっぷん，ろっぽん<br>はっぴゃく，じゅっぷん"],
+            ["", "4月:しがつ<br>7月:しちがつ<br>9月:くがつ", "特殊月份"],
+            ["", "7點:しちじ<br>9點:くじ", "特殊的幾點"],
+            ["", "頭上蓋→被（かぶ）ります<br>穿過肩→着（き）ます<br>踏過腳→履（は）きます<br>架在臉→掛（か）けます<br>配戴飾品/萬用→します", "穿戴的特別詞"],
+            ["", "よじかん", "四個小時"],
+            ["", "他動詞:入(い)れます<br>自動詞:入(はい)ります", ""],
+            ["", "東（ひがし）<br>西（にし）<br>南（みなみ）<br>北（きた）", ""],
+            ["", "出口（でぐち）<br>西口（にしぐち）", ""],
+            ["", "傘（かさ）を 差（さ）します", "撐傘"],
+            ["", "すぐ<span class='highlight'>に</span>ねます", "立刻就睡覺了"],
+            ["", "おにぎり", "飯糰"],
+            ["夕方", "ゆうがた", "傍晚"],
+            ["", "しゅっきん", "出勤、上班"],
+            ["", "まずい", "難吃"],
+            ["", "しかし：然而<br>もっと：更加<br>それから：然後<br>だから：因此", ""],
+            ["", "つぎ：下面，接著<br>うしろ：後，後面<br>まえ：之前<br>あと：之後", ""],
+            ["同じ", "おなじ", "一樣"],
+            ["", "おととし", "前年"],
+            ["", "ひとりで", "一個人做了什麼","で表示動作進行時的狀態"],
             ["着く", "つきます", "到達、抵達"]
         ];
 
@@ -960,10 +984,10 @@ function nextWord() {
             const word = vocabList[randomIndex];
 
             // 關鍵修改：將 word[1]（ます形/讀音）放到大字區塊；word[0]（辭書形/漢字）放到第二行
-            document.getElementById('mainWord').innerText = word[1]; 
-            document.getElementById('dictForm').innerText = word[0];
-            document.getElementById('meaning').innerText = word[2];
-            document.getElementById('note').innerText = word[3] || "";
+            document.getElementById('mainWord').innerHTML = word[1]; 
+            document.getElementById('dictForm').innerHTML = word[0];
+            document.getElementById('meaning').innerHTML = word[2];
+            document.getElementById('note').innerHTML = word[3] || "";
         }
 
         document.addEventListener('click', nextWord);
